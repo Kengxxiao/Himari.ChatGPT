@@ -1,15 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Himari.ChatGPT
 {
@@ -180,15 +177,21 @@ namespace Himari.ChatGPT
                                     var match = Regex.Match(rawMessage, "^\\/chat\\s+(.+)");
                                     if (match.Success)
                                     {
-                                        var group = requestJson.GetProperty("group_id").GetInt64();
                                         var userId = requestJson.GetProperty("user_id").GetInt64();
+                                        var group = requestJson.GetProperty("group_id").GetInt64();
                                         var messageId = requestJson.GetProperty("message_id").GetInt32();
+                                        if (!_gpt.GetUserCompleted(userId))
+                                        {
+                                            var body = GetSendGroupMessageBody(group, messageId, "您的上条请求尚未完成，请稍后");
+                                            _ = webSocket.SendAsync(new ArraySegment<byte>(body, 0, body.Length), WebSocketMessageType.Text, result.EndOfMessage, CancellationToken.None);
+                                            continue;
+                                        }
                                         _logger.LogInformation("收到ChatGPT请求：{message}", match.Groups[1].Value);
                                         _ = _gpt.RequestConversation(userId, match.Groups[1].Value, async (str, exp) =>
                                         {
                                             _logger.LogInformation("回复：{message}, {str}", rawMessage, str);
                                             var body = GetSendGroupMessageBody(group, messageId, exp == null ? str : exp.Message);
-                                            await webSocket.SendAsync(new ArraySegment<byte>(body, 0, body.Length), WebSocketMessageType.Text, result.EndOfMessage, CancellationToken.None);
+                                            _ = webSocket.SendAsync(new ArraySegment<byte>(body, 0, body.Length), WebSocketMessageType.Text, result.EndOfMessage, CancellationToken.None);
                                         }, CancellationToken.None);
                                     }
                                 }
@@ -214,7 +217,7 @@ namespace Himari.ChatGPT
         }
 
         private byte[] GetSendGroupMessageBody(long groupId, long replyId, string message)
-{
+        {
             var json = new
             {
                 action = "send_group_msg",
