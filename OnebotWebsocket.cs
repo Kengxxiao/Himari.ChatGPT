@@ -78,7 +78,7 @@ namespace Himari.ChatGPT
             var accessToken = _config.GetValue("AccessToken", string.Empty);
             if (!string.IsNullOrEmpty(accessToken))
             {
-                if (!AuthenticationHeaderValue.TryParse(context.Request.Headers.Get("Token"), out var authorization))
+                if (!AuthenticationHeaderValue.TryParse(context.Request.Headers.Get("Authorization"), out var authorization))
                 {
                     context.Response.StatusCode = 401;
                     context.Response.Close();
@@ -86,7 +86,7 @@ namespace Himari.ChatGPT
                     return;
                 }
                 //_logger.LogInformation("传递的Authorization: {auth} {schema} {accessToken}", authorization.Parameter, authorization.Scheme, accessToken);
-                if (authorization.Scheme != "Bearer" || authorization.Parameter != accessToken)
+                if (authorization.Scheme != "Token" || authorization.Parameter != accessToken)
                 {
                     context.Response.StatusCode = 401;
                     context.Response.Close();
