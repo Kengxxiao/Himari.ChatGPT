@@ -78,13 +78,14 @@ namespace Himari.ChatGPT
             var accessToken = _config.GetValue("AccessToken", string.Empty);
             if (!string.IsNullOrEmpty(accessToken))
             {
-                if (!AuthenticationHeaderValue.TryParse(context.Request.Headers.Get("Authorization"), out var authorization))
+                if (!AuthenticationHeaderValue.TryParse(context.Request.Headers.Get("Token"), out var authorization))
                 {
                     context.Response.StatusCode = 401;
                     context.Response.Close();
                     _logger.LogWarning("您在配置中定义了Authorization，但您的OneBot客户端没有传递它。");
                     return;
                 }
+                //_logger.LogInformation("传递的Authorization: {auth} {schema} {accessToken}", authorization.Parameter, authorization.Scheme, accessToken);
                 if (authorization.Scheme != "Bearer" || authorization.Parameter != accessToken)
                 {
                     context.Response.StatusCode = 401;
