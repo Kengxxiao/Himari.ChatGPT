@@ -1,0 +1,40 @@
+# Ignore bin and obj directories
+bin/
+obj/
+
+# Ignore NuGet packages
+**/packages/
+
+# Ignore Visual Studio temporary files
+**/.vs/
+
+# Ignore Visual Studio user settings file
+**/.vs/user*
+
+# Ignore Visual Studio cache files
+**/.vs/cache/
+
+# Ignore Visual Studio Web publish files
+**/app_data/
+**/app_start/
+**/app_global*
+
+# Ignore Visual Studio backup and auto-generated files
+**/*.bak
+**/*.suo
+**/*.user
+
+# Ignore ReSharper files
+**/resharper*
+
+# Ignore Web Deployment files
+**/web.config
+**/web.publish*
+
+# Ignore NuGet package files
+**/*.nupkg
+
+# Ignore TypeScript files
+**/*.js
+**/*.map
+**/*.d.ts
