@@ -178,6 +178,11 @@ namespace Himari.ChatGPT
             }
         }
 
+        public void AuthLoginWithAccessToken(string accessToken)
+        {
+            _accessToken = accessToken;
+        }
+
         public async Task<bool> AuthLogin(string username, string password, Action<string, Exception?> callback, CancellationToken cancellationToken)
         {
             HttpResponseMessage loginHtml = null;

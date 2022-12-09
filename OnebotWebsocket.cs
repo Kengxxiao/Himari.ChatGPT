@@ -29,21 +29,29 @@ namespace Himari.ChatGPT
 
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
-                _logger.LogWarning("请在配置文件中填写要登录的OpenAI ChatGPT账号和密码");
-                return;
-            }
-
-            var loginResult = await _gpt.AuthLogin(username, password, (str, e) =>
+                var accessToken = _config.GetValue("OAIAccessToken", string.Empty);
+                if (string.IsNullOrEmpty(accessToken))
+                {
+                    _logger.LogWarning("请在配置文件中填写要登录的OpenAI ChatGPT账号和密码，或使用AccessToken登录");
+                    return;
+                }
+                _gpt.AuthLoginWithAccessToken(accessToken);
+                _logger.LogInformation("已设置Open AI AccessToken: {AccessToken}", accessToken);
+                _logger.LogWarning("警告：在使用AccessToken访问API的情况下，Himari.ChatGPT不会校验您的权限，请确保您提供的AccessToken有效。");
+            } else
             {
-                if (!string.IsNullOrEmpty(str))
-                    _logger.LogWarning(str);
-                if (e != null)
-                    _logger.LogWarning(e.Message);
-            }, stoppingToken);
-            if (!loginResult)
-            {
-                _logger.LogWarning("登录失败，请重新登录");
-                return;
+                var loginResult = await _gpt.AuthLogin(username, password, (str, e) =>
+                {
+                    if (!string.IsNullOrEmpty(str))
+                        _logger.LogWarning(str);
+                    if (e != null)
+                        _logger.LogWarning(e.Message);
+                }, stoppingToken);
+                if (!loginResult)
+                {
+                    _logger.LogWarning("登录失败，请重新登录");
+                    return;
+                }
             }
 
             var ipAddress = IPAddress.Parse(_config.GetValue("BindIp", "127.0.0.1") ?? "127.0.0.1");
@@ -190,6 +198,8 @@ namespace Himari.ChatGPT
                                         _logger.LogInformation("收到ChatGPT请求：{message}", match.Groups[1].Value);
                                         _ = _gpt.RequestConversation(userId, match.Groups[1].Value, async (str, exp) =>
                                         {
+                                            if (webSocket.State != WebSocketState.Open)
+                                                return;
                                             _logger.LogInformation("回复：{message}, {str}", rawMessage, str);
                                             var body = GetSendGroupMessageBody(group, messageId, exp == null ? str : exp.Message);
                                             _ = webSocket.SendAsync(new ArraySegment<byte>(body, 0, body.Length), WebSocketMessageType.Text, result.EndOfMessage, CancellationToken.None);
