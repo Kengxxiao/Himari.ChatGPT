@@ -34,7 +34,7 @@
 ```javascript
 fetch("https://chat.openai.com/api/auth/session").then(resp => resp.json()).then(json => console.log(json.accessToken))
 ````
-等待一段事件后，将返回的结果填写入```OAIAccessToken```中。
+等待一段时间后，将返回的结果填写入```OAIAccessToken```中。
 
 ## 指令
 ```/chat <对话内容>```  
