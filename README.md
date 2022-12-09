@@ -28,9 +28,9 @@
 ```BindIp```和```BindPort```为WebSocket服务绑定的IP和端口。  
 
 ## AccessToken登录
-如果您是使用Google等平台登入到Open AI的，您需要使用此种登录方式。
-您需要在浏览器中登录到ChatGPT主页（即可以输入文本的页面）。
-按下```F12```打开浏览器控制台，点击上方的```控制台```选项，随后输入
+如果您是使用Google等平台登入到Open AI的，您需要使用此种登录方式。  
+您需要在浏览器中登录到ChatGPT主页（即可以输入文本的页面）。  
+按下```F12```打开浏览器控制台，点击上方的```控制台```选项，随后输入  
 ```javascript
 fetch("https://chat.openai.com/api/auth/session").then(resp => resp.json()).then(json => console.log(json.accessToken))
 ````
